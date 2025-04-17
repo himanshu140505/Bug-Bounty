@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+lxml
+shodan
+python-nmap
+sublist3r
+dnspython

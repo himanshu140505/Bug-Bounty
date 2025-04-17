@@ -1,38 +1,40 @@
 #!/bin/bash
 
-# 🔥 Advanced Recon Automation Script
-# ✍️ Author: DevilHacksIt
+# Basic Bug Bounty Recon Script 🚀
+# Author: Devil✨
+
+source ./banner.sh
+clear
+printbanner
 
 domain=$1
 
 if [ -z "$domain" ]; then
-  echo "❌ Usage: $0 <domain>"
+  echo "Usage: $0 <domain>"
   exit 1
 fi
 
-echo "🚀 Starting Advanced Recon on: $domain"
+echo "🔍 Starting recon for: $domain at $(date +%T)"
 
-# Setup
-OUTDIR="output/$domain"
-mkdir -p "$OUTDIR"
 
-# Subdomain Enumeration
-echo "🔍 Finding subdomains..."
-subfinder -d "$domain" -silent > "$OUTDIR/subdomains.txt"
-assetfinder --subs-only "$domain" >> "$OUTDIR/subdomains.txt"
-cat "$OUTDIR/subdomains.txt" | sort -u > "$OUTDIR/subs_clean.txt"
+# Create output directory
+mkdir -p recon/$domain
+cd recon/$domain || exit
 
-# Probing for live domains
-echo "🌐 Checking live subdomains..."
-httpx -l "$OUTDIR/subs_clean.txt" -silent > "$OUTDIR/live.txt"
+# Subdomain Enumeration 🕵️‍♂️
+echo "📦 Gathering subdomains..."
+subfinder -d $domain -silent > subdomains.txt
+assetfinder --subs-only $domain >> subdomains.txt
+sort -u subdomains.txt -o subdomains.txt
 
-# Port scanning
-echo "🚪 Running port scan..."
-naabu -host "$domain" -silent > "$OUTDIR/ports.txt"
+# Probing live domains 🌐
+echo "📡 Probing for live domains..."
+cat subdomains.txt | httpx-toolkit -sc -silent -probe > live.txt
 
-# Wayback URLs
-echo "🕰️ Pulling Wayback Machine URLs..."
-cat "$OUTDIR/live.txt" | waybackurls > "$OUTDIR/wayback.txt"
+echo "🧹 Cleaning the live domains..."
+sed -E 's/^(https?:\/\/[^ ]+).*/\1/' live.txt > cleaned.txt
 
-# Final
-echo "✅ Recon completed! Data saved in: $OUTDIR"
+
+# Done ✅
+echo "🎯 Recon completedat $(date +%T)"
+echo "✅Results saved in recon/$domain/"
